@@ -204,15 +204,27 @@ const commands = {
         agenteData = await db.getAgente(agenteId);
       }
       
+      const statoServizio = agenteData.inServizio ? '🟢 In servizio' : '⚫ Fuori servizio';
+      const inizioTurno = agenteData.timbraInizio ? new Date(agenteData.timbraInizio).toLocaleString('it-IT') : '—';
+
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
         .setTitle(`🚔 CARTELLINO LSPD - ${agenteData.nome}`)
-        .setDescription('**CIAO AGENTE LSPD**\n\nPER TIMBRARE IL TUO SERVIZIO UTILIZZA I SEGUENTI BOTTONI:\n\n' +
-          '🟢 **Timbra** - Registra l\'inizio del tuo turno di servizio\n' +
-          '🔴 **Stimbra** - Registra la fine del tuo turno e calcola le ore lavorate\n' +
-          '📊 **In Servizio** - Visualizza lo stato attuale del tuo servizio\n' +
-          '📋 **Info** - Visualizza tutte le tue statistiche (ore totali, arresti, PDA emessi, etc.)')
-        .setFooter({ text: `ID: ${agenteId}` });
+        .setDescription('**CARTELLINO UFFICIALE LSPD**\nUsa i comandi qui sotto per gestire il tuo turno e consultare le statistiche del servizio.')
+        .addFields([
+          { name: '👮 Agente', value: agenteData.nome, inline: true },
+          { name: '🆔 ID', value: `\`${agenteId}\``, inline: true },
+          { name: '📌 Stato', value: statoServizio, inline: true },
+          { name: '⏱️ Inizio Turno', value: `\`${inizioTurno}\``, inline: true },
+          { name: '🕒 Ore Cartellino', value: `\`${agenteData.oreServizio.toFixed(2)}h\``, inline: true },
+          { name: '📊 Ore Totali', value: `\`${agenteData.oreTotali.toFixed(2)}h\``, inline: true },
+          { name: '🚔 Arresti', value: `\`${agenteData.arresti}\``, inline: true },
+          { name: '💰 Multe', value: `\`${agenteData.multe}\``, inline: true },
+          { name: '🚗 Sequestri', value: `\`${agenteData.sequestri}\``, inline: true },
+          { name: '🔫 PDA Emessi', value: `\`${agenteData.pdaEmessi}\``, inline: true }
+        ])
+        .setFooter({ text: `ID: ${agenteId} • LSPD Cartellino` })
+        .setTimestamp();
       
       const row = new ActionRowBuilder()
         .addComponents(
@@ -447,28 +459,25 @@ const commands = {
       );
       
       const eta = calculateAge(dataNascita);
+      const arrestDate = new Date();
       const embed = new EmbedBuilder()
         .setColor(0xff0000)
         .setTitle(`🚔 ARRESTO REGISTRATO`)
+        .setDescription(`**Arrestato:** ${nome} ${cognome}\n**Data Arresto:** ${arrestDate.toLocaleDateString('it-IT')} • ${arrestDate.toLocaleTimeString('it-IT')}`)
         .setImage(foto)
-        .setDescription(`**Arrestato:** ${nome} ${cognome}`)
         .setFields([
           { name: '🆔 ID Arresto', value: `\`${arrestId}\``, inline: true },
-          { name: '📅 Data Nascita', value: `\`${dataNascita}\``, inline: true },
+          { name: '📅 Nascita', value: `\`${dataNascita}\``, inline: true },
           { name: '🧬 Età', value: `\`${eta.anni} anni ${eta.mesi} mesi\``, inline: true },
-          { name: '\u200b', value: '\u200b' },
-          { name: '⚖️ Reati Imputati', value: `\`\`\`${reati}\`\`\``, inline: false },
           { name: '💰 Multa', value: `\`€${multa.toFixed(2)}\``, inline: true },
-          { name: '📅 Data Arresto', value: `\`${new Date().toLocaleDateString('it-IT')}\``, inline: true },
-          { name: '\u200b', value: '\u200b' },
-          { name: '🔒 Oggetti Sequestrati', value: `\`\`\`${oggettiSequestrati}\`\`\``, inline: false },
-          { name: '📦 Oggetti Consegnati', value: `\`\`\`${oggettiConsegnati}\`\`\``, inline: false },
-          { name: '\u200b', value: '\u200b' },
-          { name: '👮 Agenti Coinvolti', value: agentiMenzionati.map((id, i) => `${i + 1}. <@${id}>`).join('\n'), inline: false },
+          { name: '⚖️ Reati', value: `\`\`\`${reati}\`\`\``, inline: false },
+          { name: '🔒 Sequestrati', value: `\`\`\`${oggettiSequestrati}\`\`\``, inline: false },
+          { name: '📦 Consegnati', value: `\`\`\`${oggettiConsegnati}\`\`\``, inline: false },
+          { name: '👮 Agenti', value: agentiMenzionati.map((id, i) => `${i + 1}. <@${id}>`).join('\n'), inline: false },
           { name: '👤 Registrato da', value: `\`${interaction.user.username}\``, inline: true },
-          { name: '⏰ Ora', value: `\`${new Date().toLocaleTimeString('it-IT')}\``, inline: true }
+          { name: '⏰ Ora', value: `\`${arrestDate.toLocaleTimeString('it-IT')}\``, inline: true }
         ])
-        .setFooter({ text: 'LSPD Database System' })
+        .setFooter({ text: 'LSPD Arresto • Sistema di controllo' })
         .setTimestamp();
       
       await interaction.reply({ embeds: [embed] });
