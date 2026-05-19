@@ -61,6 +61,16 @@ function hasRole(member, roleName) {
 
 async function handleReady() {
   console.log(`✅ Bot online come ${client.user.tag}`);
+
+  if (process.env.MONGO_URI || process.env.MONGODB_URI || process.env.DATABASE_URL) {
+    try {
+      console.log('🔌 Connessione a MongoDB in corso...');
+      await db.connectMongo();
+      console.log('✅ MongoDB connesso');
+    } catch (error) {
+      console.error('❌ Errore connessione MongoDB:', error);
+    }
+  }
   
   // Registra i comandi slash
   const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -93,7 +103,10 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
     const command = client.commands[interaction.commandName];
     
-    if (!command) return;
+    if (!command) {
+      console.warn(`Comando non trovato: ${interaction.commandName}`);
+      return interaction.reply({ content: '❌ Comando non trovato.', ephemeral: true });
+    }
     
     try {
       await command.execute(interaction, client);
@@ -104,7 +117,7 @@ client.on('interactionCreate', async (interaction) => {
         content: `❌ C'è stato un errore nell'esecuzione del comando!\n\`\`\`${errorMsg}\`\`\``, 
         ephemeral: true 
       };
-      if (interaction.replied) {
+      if (interaction.replied || interaction.deferred) {
         await interaction.followUp(errorMessage);
       } else {
         await interaction.reply(errorMessage);

@@ -890,6 +890,7 @@ async function pulisciFedina(nome, cognome, dataNascita) {
 module.exports = {
   loadDatabase,
   saveDatabase,
+  connectMongo,
   addAgente,
   updateAgente,
   getAgente,
