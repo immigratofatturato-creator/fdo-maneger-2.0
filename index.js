@@ -62,16 +62,6 @@ function hasRole(member, roleName) {
 async function handleReady() {
   console.log(`✅ Bot online come ${client.user.tag}`);
 
-  if (process.env.MONGO_URI || process.env.MONGODB_URI || process.env.DATABASE_URL) {
-    try {
-      console.log('🔌 Connessione a MongoDB in corso...');
-      await db.connectMongo();
-      console.log('✅ MongoDB connesso');
-    } catch (error) {
-      console.error('❌ Errore connessione MongoDB:', error);
-    }
-  }
-  
   // Registra i comandi slash
   const rest = new REST({ version: '10' }).setToken(TOKEN);
   const commandData = Object.values(commands).map(cmd => cmd.data.toJSON());
