@@ -59,7 +59,7 @@ function hasRole(member, roleName) {
   return member.roles.cache.some(role => role.name === roleName || role.id === roleName);
 }
 
-client.on('ready', async () => {
+async function handleReady() {
   console.log(`✅ Bot online come ${client.user.tag}`);
   
   // Registra i comandi slash
@@ -84,7 +84,10 @@ client.on('ready', async () => {
   } catch (error) {
     console.error('❌ Errore nella registrazione dei comandi:', error);
   }
-});
+}
+
+client.once('ready', handleReady);
+client.once('clientReady', handleReady);
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
