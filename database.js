@@ -15,10 +15,7 @@ async function connectMongo() {
   if (!mongoUri) return;
   if (mongoDb) return;
 
-  mongoClient = new MongoClient(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
+  mongoClient = new MongoClient(mongoUri);
   await mongoClient.connect();
   mongoDb = mongoClient.db(mongoDbName);
 }

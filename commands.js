@@ -10,7 +10,15 @@ function getGuildEnv(key, guildId) {
   if (byId !== undefined) return byId;
 
   // Poi prova la variante numerica basata sull'ordine in GUILD_IDS: VAR_1, VAR_2, ...
-  const guildsList = (process.env.GUILD_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  let guildsList = (process.env.GUILD_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (guildsList.length === 0) {
+    guildsList = Object.keys(process.env)
+      .filter(k => /^GUILD_ID_\d+$/.test(k))
+      .map(k => ({ n: parseInt(k.split('_').pop(), 10), v: process.env[k] }))
+      .sort((a, b) => a.n - b.n)
+      .map(x => x.v.trim())
+      .filter(Boolean);
+  }
   const idx = guildsList.indexOf(String(guildId));
   if (idx !== -1) {
     const byIndex = process.env[`${key}_${idx + 1}`];
